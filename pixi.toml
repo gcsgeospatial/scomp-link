@@ -1,0 +1,89 @@
+[project]
+name = "scomp-link"
+description = "Photogrammetry Target Generator - generates circular photogrammetry targets with encoded bit patterns"
+version = "1.0.0"
+readme = "README.md"
+homepage = "https://github.com/gcsgeospatial/scomp-link"
+repository = "https://github.com/gcsgeospatial/scomp-link"
+license = "Apache-2.0"
+license-file = "LICENSE"
+authors = ["GCS Geospatial"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+# Note: ImageMagick is automatically installed on Linux and macOS
+# Windows users must install ImageMagick separately from:
+# https://imagemagick.org/script/download.php#windows
+
+[dependencies]
+# Core runtime dependencies
+python = ">=3.8,<4"
+click = ">=8.1.0"
+
+[target.linux-64.dependencies]
+# ImageMagick is available on Linux
+imagemagick = "*"
+
+[target.osx-64.dependencies] 
+# ImageMagick is available on macOS Intel
+imagemagick = "*"
+
+[target.osx-arm64.dependencies]
+# ImageMagick is available on macOS ARM  
+imagemagick = "*"
+
+# Note: ImageMagick is not available on Windows via conda-forge
+# Windows users need to install ImageMagick separately
+
+[feature.dev.dependencies]
+# Development and testing dependencies
+pytest = ">=7.0.0"
+pytest-cov = ">=4.0.0"
+flake8 = ">=6.0.0"
+black = ">=23.0.0"
+isort = ">=5.12.0"
+
+[tasks]
+# Main application tasks
+run = "python main.py"
+help = "python main.py --help"
+
+# Generate targets with common configurations
+generate-test = "python main.py --bits 12 --output-dir ./test --width 300 --height 300 --max-codes 2"
+generate-small = "python main.py --bits 12 --output-dir ./output --width 1000 --height 1000 --max-codes 10"
+generate-full = "python main.py --bits 12 --output-dir ./targets --width 3000 --height 3000"
+
+# Testing tasks
+test = "python -m pytest test_main.py -v"
+test-cov = "python -m pytest test_main.py --cov=main --cov-report=term-missing"
+test-integration = { cmd = "python main.py --bits 12 --output-dir ./test --width 300 --height 300 --max-codes 2 && ls -la test/*.png && file test/*.png", depends-on = ["clean-test"] }
+
+# Code quality tasks
+lint = "python -m flake8 main.py"
+format-check = "python -m black --check main.py"
+format = "python -m black main.py"
+sort-imports = "python -m isort main.py"
+check-all = { depends-on = ["lint", "format-check", "test"] }
+
+# Validation tasks
+validate-syntax = "python -m py_compile main.py"
+validate-import = "python -c \"import main; print('Import successful')\""
+validate = { depends-on = ["validate-syntax", "validate-import", "test"] }
+
+# Cleanup tasks
+clean-test = "rm -rf ./test/*.png 2>/dev/null || true"
+clean-output = "rm -rf ./output/*.png ./targets/*.png 2>/dev/null || true"
+clean = { depends-on = ["clean-test", "clean-output"] }
+
+# Setup verification
+verify-imagemagick = "magick --version"
+verify-setup = { depends-on = ["verify-imagemagick", "validate"] }
+
+[environments]
+default = { features = ["dev"], solve-group = "default" }
+production = { features = [], solve-group = "default" }
+
+[feature.dev.tasks]
+# Development-specific tasks
+dev-setup = { depends-on = ["verify-setup"] }
+quick-test = "python main.py --bits 8 --output-dir ./test --width 200 --height 200 --max-codes 1"

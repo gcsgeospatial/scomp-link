@@ -43,7 +43,51 @@ Before contributing, ensure you have:
 
 ## Development Setup
 
-### Method 1: Conda Environment (Recommended)
+### Method 1: Pixi (Recommended)
+
+[Pixi](https://pixi.sh) provides the most streamlined development experience:
+
+**Linux and macOS:**
+```bash
+# Install pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Fork and clone your fork
+git clone https://github.com/your-username/scomp-link.git
+cd scomp-link
+
+# Install all dependencies and setup environment
+pixi install
+
+# Verify setup
+pixi run verify-setup
+pixi run test
+```
+
+**Windows:**
+```powershell
+# Install pixi (if not already installed)
+iwr -useb https://pixi.sh/install.ps1 | iex
+
+# Fork and clone your fork
+git clone https://github.com/your-username/scomp-link.git
+cd scomp-link
+
+# Install Python dependencies
+pixi install
+
+# Install ImageMagick separately (required)
+# Download from: https://imagemagick.org/script/download.php#windows
+# Or use chocolatey: choco install imagemagick
+
+# Verify setup (after ImageMagick installation)
+pixi run verify-setup
+pixi run test
+```
+
+> **Windows Note**: ImageMagick must be installed separately on Windows as it's not available through conda-forge.
+
+### Method 2: Conda Environment
 
 ```bash
 # Fork and clone your fork
@@ -59,7 +103,7 @@ python -m pytest test_main.py -v
 python main.py --help
 ```
 
-### Method 2: Virtual Environment
+### Method 3: Virtual Environment
 
 ```bash
 # Clone repository
@@ -83,7 +127,15 @@ python -m pytest test_main.py -v
 
 ### Development Tools
 
-Install additional development tools for code quality:
+**Using pixi (all tools included automatically):**
+```bash
+pixi run lint          # Code style check
+pixi run test          # Run tests
+pixi run format-check  # Check code formatting
+pixi run check-all     # Run all quality checks
+```
+
+**Using pip (manual installation):**
 
 ```bash
 # Already included in requirements.txt
