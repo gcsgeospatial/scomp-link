@@ -40,8 +40,8 @@ ImageMagick is not available via conda on Windows, so you need to install it sep
 4. Add ImageMagick to your system PATH during installation
 5. Install Python dependencies:
    ```cmd
-   # Use the Windows-specific environment file
-   conda env create -f environment-windows.yaml
+   # Use the standard environment file (ImageMagick will be skipped on Windows)
+   conda env create -f environment.yaml
    conda activate generate-targets
    
    # Or use pip

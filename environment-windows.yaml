@@ -1,8 +1,0 @@
-name: generate-targets
-channels:
-  - conda-forge
-dependencies:
-  - python
-  - click
-  # ImageMagick is not available via conda on Windows
-  # Please see README.md for Windows installation instructions
