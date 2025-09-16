@@ -280,7 +280,7 @@ def generate_targets(
             f'{center[0]}, {center[1]+radius_inner_dot}"'
         )
         command = (
-            f"magick -size {width}x{height} xc: white {outer_black_circle} "
+            f"magick -size {width}x{height} xc:white {outer_black_circle} "
             f"{arc_commands} {outer_white_circle} {inner_black_circle} "
             f"{inner_white_circle} {filename}"
         )
