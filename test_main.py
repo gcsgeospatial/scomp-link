@@ -321,6 +321,35 @@ class TestGenerateTargetsCommand:
         # Should show error about directory creation
         assert "Error creating output directory" in result.output
 
+    def test_generate_targets_imagemagick_command_format(
+        self, mock_exists, mock_makedirs, mock_subprocess, mock_which
+    ):
+        """Test that ImageMagick command has correct xc:white syntax."""
+        mock_which.return_value = "/usr/bin/magick"
+        mock_exists.return_value = True
+        mock_subprocess.return_value = MagicMock()
+
+        runner = CliRunner()
+        result = runner.invoke(
+            main.generate_targets,
+            ["--bits", "4", "--output-dir", "/tmp/test", "--max-codes", "1"],
+        )
+
+        # Should execute successfully
+        assert result.exit_code == 0
+
+        # Verify subprocess.run was called
+        assert mock_subprocess.called
+
+        # Get the command that was executed
+        call_args = mock_subprocess.call_args
+        command = call_args[0][0]  # First positional argument
+
+        # Verify the command contains correct xc:white syntax (no space)
+        assert "xc:white" in command
+        # Verify it doesn't contain the incorrect syntax with space
+        assert "xc: white" not in command
+
 
 class TestIntegration:
     """Integration tests that test multiple functions together."""
