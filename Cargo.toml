@@ -1,0 +1,19 @@
+[package]
+name = "scomp-link"
+version = "1.0.0"
+edition = "2021"
+description = "Photogrammetry Target Generator - generates circular photogrammetry targets with encoded bit patterns"
+license = "Apache-2.0"
+homepage = "https://github.com/gcsgeospatial/scomp-link"
+repository = "https://github.com/gcsgeospatial/scomp-link"
+authors = ["GCS Geospatial"]
+
+[[bin]]
+name = "scomp-link"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+
+[dev-dependencies]
+# Test dependencies
