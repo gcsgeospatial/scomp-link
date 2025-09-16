@@ -79,6 +79,48 @@ brew install imagemagick
 pip install -r requirements.txt
 ```
 
+**Windows:**
+
+ImageMagick is not available via conda on Windows, so you need to install it separately:
+
+*Method 1: Direct Download (Recommended)*
+1. Download ImageMagick from the official website: https://imagemagick.org/script/download.php#windows
+2. Choose the appropriate version for your system (32-bit or 64-bit)
+3. Run the installer and ensure "Install development headers and libraries for C and C++" is checked
+4. Add ImageMagick to your system PATH during installation
+5. Install Python dependencies:
+   ```cmd
+   # Use the standard environment file (ImageMagick will be skipped on Windows)
+   conda env create -f environment.yaml
+   conda activate generate-targets
+   
+   # Or use pip
+   pip install -r requirements.txt
+   ```
+
+*Method 2: Package Managers*
+```cmd
+# Chocolatey
+choco install imagemagick
+
+# Scoop  
+scoop install imagemagick
+
+# Then install Python dependencies
+pip install -r requirements.txt
+```
+
+### Verifying Installation
+
+After installation, verify that ImageMagick is properly installed and accessible:
+
+```bash
+# This should display ImageMagick version information
+magick -version
+```
+
+If the command is not found, ensure that ImageMagick is properly added to your system's PATH environment variable.
+
 ## Quick Start
 
 Generate a basic set of photogrammetry targets:
@@ -92,6 +134,12 @@ python main.py --bits 12 --output-dir ./targets --width 3000 --height 3000
 ```
 
 ## Usage
+
+To use the code, follow these steps:
+
+1. Install the required dependencies following the platform-specific instructions in the [Installation](#installation) section above.
+2. Run the script `main.py` with appropriate command-line options to specify the parameters for generating the target images.
+3. Generated PNG files will be saved in the specified output directory.
 
 ### Command-line Options
 
