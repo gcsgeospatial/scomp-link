@@ -47,6 +47,7 @@ Before contributing, ensure you have:
 
 [Pixi](https://pixi.sh) provides the most streamlined development experience:
 
+**Linux and macOS:**
 ```bash
 # Install pixi (if not already installed)
 curl -fsSL https://pixi.sh/install.sh | bash
@@ -62,6 +63,29 @@ pixi install
 pixi run verify-setup
 pixi run test
 ```
+
+**Windows:**
+```powershell
+# Install pixi (if not already installed)
+iwr -useb https://pixi.sh/install.ps1 | iex
+
+# Fork and clone your fork
+git clone https://github.com/your-username/scomp-link.git
+cd scomp-link
+
+# Install Python dependencies
+pixi install
+
+# Install ImageMagick separately (required)
+# Download from: https://imagemagick.org/script/download.php#windows
+# Or use chocolatey: choco install imagemagick
+
+# Verify setup (after ImageMagick installation)
+pixi run verify-setup
+pixi run test
+```
+
+> **Windows Note**: ImageMagick must be installed separately on Windows as it's not available through conda-forge.
 
 ### Method 2: Conda Environment
 

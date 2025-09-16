@@ -11,11 +11,29 @@ authors = ["GCS Geospatial"]
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
+# Note: ImageMagick is automatically installed on Linux and macOS
+# Windows users must install ImageMagick separately from:
+# https://imagemagick.org/script/download.php#windows
+
 [dependencies]
 # Core runtime dependencies
 python = ">=3.8,<4"
 click = ">=8.1.0"
+
+[target.linux-64.dependencies]
+# ImageMagick is available on Linux
 imagemagick = "*"
+
+[target.osx-64.dependencies] 
+# ImageMagick is available on macOS Intel
+imagemagick = "*"
+
+[target.osx-arm64.dependencies]
+# ImageMagick is available on macOS ARM  
+imagemagick = "*"
+
+# Note: ImageMagick is not available on Windows via conda-forge
+# Windows users need to install ImageMagick separately
 
 [feature.dev.dependencies]
 # Development and testing dependencies

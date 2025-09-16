@@ -39,6 +39,7 @@ scomp-link is a Python CLI application that generates high-precision target imag
 
 [Pixi](https://pixi.sh) is a modern, cross-platform package manager that handles both dependencies and task execution:
 
+**Linux and macOS:**
 ```bash
 # Install pixi (if not already installed)
 curl -fsSL https://pixi.sh/install.sh | bash
@@ -56,6 +57,31 @@ pixi run help
 # Run the application
 pixi run generate-test
 ```
+
+**Windows:**
+```powershell
+# Install pixi (if not already installed)
+iwr -useb https://pixi.sh/install.ps1 | iex
+
+# Clone the repository
+git clone https://github.com/gcsgeospatial/scomp-link.git
+cd scomp-link
+
+# Install Python dependencies (ImageMagick must be installed separately)
+pixi install
+
+# Install ImageMagick separately (required)
+# Download from: https://imagemagick.org/script/download.php#windows
+# Or use chocolatey: choco install imagemagick
+
+# Verify installation
+pixi run help
+
+# Run the application
+pixi run generate-test
+```
+
+> **Note**: ImageMagick is not available on Windows through conda-forge, so Windows users must install it separately from the [official ImageMagick website](https://imagemagick.org/script/download.php#windows) or using a package manager like Chocolatey.
 
 ### Method 2: Conda Environment
 
