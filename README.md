@@ -423,7 +423,7 @@ Schneider, C. T. “3-D Vermessung von Oberflächen und Bauteilen durch Photogra
 An alternate implementation of similar functionality was provided by Matthew Petroff in his repository:
 
 - [Photogrammetry Targets](https://mpetroff.net/2018/05/photogrammetry-targets/)
-- [GitHub Repository](https://github.com/mpetroff/photogrammetry-targets)
+- [GitHub Repository](https://github.com/mpetroff)
 
 Petroff's implementation uses SVG files and Inkscape for PDF export, while this implementation focuses on PNG generation with ImageMagick.
 
