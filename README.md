@@ -29,6 +29,42 @@ To use the code, follow these steps:
 python main.py --bits 12 --output-dir ./output --width 3000 --height 3000
 ```
 
+## Development
+
+### Testing
+
+This project includes a comprehensive test suite using pytest. To run the tests:
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run tests
+python -m pytest test_main.py
+
+# Run tests with coverage
+python -m pytest test_main.py --cov=main --cov-report=term-missing
+```
+
+### Linting and Code Quality
+
+The project uses several tools to maintain code quality:
+
+```bash
+# Check code style with flake8
+python -m flake8 .
+
+# Format code with black
+python -m black .
+
+# Sort imports with isort
+python -m isort .
+```
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests and linting on all pull requests and pushes to main/develop branches. The workflow tests against multiple Python versions (3.8-3.12) to ensure compatibility.
+
 ## Acknowledgments
 
 This code is based on the work of Christoph T. Schneider, as described in:

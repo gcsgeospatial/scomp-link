@@ -1,8 +1,9 @@
 import math
-import click
-import subprocess
 import os
 import shutil
+import subprocess
+
+import click
 
 
 def bitwise_rotate_left(val, bits, total_bits):
@@ -169,7 +170,12 @@ def generate_arc_commands(code, bits, center, radius_outer):
 
             # Construct the arc command
             # Note: This assumes clockwise drawing; adjust as necessary
-            command = f"-fill white -draw \"path 'M {center[0]},{center[1]} L {start_outer[0]},{start_outer[1]} A {radius_outer},{radius_outer} 0 0,1 {end_outer[0]},{end_outer[1]} Z'\""
+            command = (
+                f"-fill white -draw \"path 'M {center[0]}, {center[1]} "
+                f"L {start_outer[0]}, {start_outer[1]} "
+                f"A {radius_outer}, {radius_outer} 0 0, 1 "
+                f"{end_outer[0]}, {end_outer[1]} Z'\""
+            )
             commands.append(command)
 
     return " ".join(commands)
@@ -252,18 +258,32 @@ def generate_targets(
         )  # Example outer radius, adjust based on your needs
 
         bits = 12
-        arc_commands = generate_arc_commands(
-            code, bits, center, radius_outer
-        )
+        arc_commands = generate_arc_commands(code, bits, center, radius_outer)
 
         filename = f"{output_dir}/{code}.png"
         # Construct the ImageMagick command here using the provided radii and other parameters
         # This is a placeholder for how you might start constructing the command
-        outer_black_circle = f'-fill black -draw "circle {center[0]},{center[1]} {center[0]},{center[1]+radius_outer_black}"'
-        outer_white_circle = f'-fill white -draw "circle {center[0]},{center[1]} {center[0]},{center[1]+radius_outer_white}"'
-        inner_black_circle = f'-fill black -draw "circle {center[0]},{center[1]} {center[0]},{center[1]+radius_inner_black}"'
-        inner_white_circle = f'-fill white -draw "circle {center[0]},{center[1]} {center[0]},{center[1]+radius_inner_dot}"'
-        command = f"magick -size {width}x{height} xc:white {outer_black_circle} {arc_commands} {outer_white_circle} {inner_black_circle} {inner_white_circle} {filename}"
+        outer_black_circle = (
+            f'-fill black -draw "circle {center[0]}, {center[1]} '
+            f'{center[0]}, {center[1]+radius_outer_black}"'
+        )
+        outer_white_circle = (
+            f'-fill white -draw "circle {center[0]}, {center[1]} '
+            f'{center[0]}, {center[1]+radius_outer_white}"'
+        )
+        inner_black_circle = (
+            f'-fill black -draw "circle {center[0]}, {center[1]} '
+            f'{center[0]}, {center[1]+radius_inner_black}"'
+        )
+        inner_white_circle = (
+            f'-fill white -draw "circle {center[0]}, {center[1]} '
+            f'{center[0]}, {center[1]+radius_inner_dot}"'
+        )
+        command = (
+            f"magick -size {width}x{height} xc: white {outer_black_circle} "
+            f"{arc_commands} {outer_white_circle} {inner_black_circle} "
+            f"{inner_white_circle} {filename}"
+        )
         # Add more parameters to the command based on the radii and the code
         # click.echo(command)
 
