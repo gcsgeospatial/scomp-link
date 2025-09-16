@@ -7,6 +7,9 @@ license = "Apache-2.0"
 homepage = "https://github.com/gcsgeospatial/scomp-link"
 repository = "https://github.com/gcsgeospatial/scomp-link"
 authors = ["GCS Geospatial"]
+keywords = ["photogrammetry", "targets", "computer-vision", "image-generation"]
+categories = ["command-line-utilities", "graphics", "science"]
+readme = "README_RUST.md"
 
 [[bin]]
 name = "scomp-link"
@@ -17,3 +20,8 @@ clap = { version = "4.0", features = ["derive"] }
 
 [dev-dependencies]
 # Test dependencies
+
+[package.metadata.docs.rs]
+# Documentation settings for docs.rs
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

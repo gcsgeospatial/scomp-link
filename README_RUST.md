@@ -11,23 +11,76 @@ The Rust implementation provides:
 - **Performance**: Native compiled performance compared to interpreted Python
 - **Memory safety**: Rust's ownership system prevents common bugs
 
+### Installation Options
+
+There are several ways to install and use the Rust version:
+
+#### Option 1: Install via Cargo (Recommended)
+```bash
+# Install directly from the repository
+cargo install --git https://github.com/gcsgeospatial/scomp-link.git
+
+# Or install from local source
+cargo install --path .
+
+# Then use the installed binary
+scomp-link --help
+scomp-link --bits 12 --output-dir ./targets --width 3000 --height 3000
+```
+
+#### Option 2: Build and Install Manually
+```bash
+# Build the release binary
+cargo build --release
+
+# Copy to a location in your PATH (e.g., ~/.local/bin)
+cp target/release/scomp-link ~/.local/bin/
+# Or system-wide (requires sudo)
+sudo cp target/release/scomp-link /usr/local/bin/
+
+# Now you can use it directly
+scomp-link --help
+```
+
+#### Option 3: Run from Build Directory
+```bash
+# Build the project
+cargo build --release
+
+# Run the binary directly from target/release/
+./target/release/scomp-link --help
+./target/release/scomp-link --bits 12 --output-dir ./targets
+```
+
+#### Option 4: Development/Testing
+```bash
+# For development and testing, use cargo run
+cargo run --release -- --help
+cargo run --release -- --bits 12 --output-dir ./targets
+```
+
+### Binary Details
+
+The built binary is:
+- **Self-contained**: No runtime dependencies (except ImageMagick for image generation)
+- **Cross-platform**: Can be built for Linux, macOS, and Windows
+- **Optimized**: Release builds are fully optimized for performance
+- **Small**: Typically 1-2 MB in size
+
 ### Building and Running
 
 ```bash
 # Build the Rust version
 cargo build --release
 
-# Run with default parameters
-cargo run --release
-
 # Show help
-cargo run --release -- --help
+./target/release/scomp-link --help
 
 # Generate targets (same parameters as Python version)
-cargo run --release -- --bits 12 --output-dir ./targets --width 3000 --height 3000
+./target/release/scomp-link --bits 12 --output-dir ./targets --width 3000 --height 3000
 
 # Generate test targets
-cargo run --release -- --bits 6 --max-codes 3 --output-dir ./test --width 300 --height 300
+./target/release/scomp-link --bits 6 --max-codes 3 --output-dir ./test --width 300 --height 300
 ```
 
 ### Testing
@@ -43,6 +96,41 @@ cargo test -- --nocapture
 cargo test bitwise_operations
 cargo test code_generation
 cargo test integration
+```
+
+### Cross-Platform Building
+
+You can build for different platforms:
+
+```bash
+# Build for current platform
+cargo build --release
+
+# Build for Windows (from Linux/macOS)
+cargo build --release --target x86_64-pc-windows-gnu
+
+# Build for macOS (from Linux, requires cross-compilation setup)
+cargo build --release --target x86_64-apple-darwin
+
+# List available targets
+rustup target list
+```
+
+### Package Distribution
+
+For distribution, you can:
+
+1. **Use the binary directly**: Copy `target/release/scomp-link` to any system
+2. **Create installers**: Use tools like `cargo-deb` for Debian packages or `cargo-bundle` for other formats
+3. **Docker**: Create a container with the binary for easy deployment
+4. **GitHub Releases**: Attach pre-built binaries to GitHub releases
+
+Example Dockerfile:
+```dockerfile
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y imagemagick && rm -rf /var/lib/apt/lists/*
+COPY target/release/scomp-link /usr/local/bin/
+ENTRYPOINT ["scomp-link"]
 ```
 
 ### Verification
