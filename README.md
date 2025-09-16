@@ -2,11 +2,86 @@
 
 This code generates target images with specified parameters and saves them as PNG files. It utilizes the ImageMagick library for drawing arcs.
 
+## Installation
+
+### Prerequisites
+
+This application requires ImageMagick to be installed on your system. Installation methods vary by platform:
+
+### Linux/macOS
+
+#### Method 1: Conda Environment (Recommended)
+```bash
+# Create conda environment with all dependencies including ImageMagick
+conda env create -f environment.yaml
+conda activate generate-targets
+```
+
+#### Method 2: System Package Manager + pip
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install imagemagick
+pip install -r requirements.txt
+
+# macOS (with Homebrew)
+brew install imagemagick
+pip install -r requirements.txt
+```
+
+### Windows
+
+ImageMagick is not available via conda on Windows, so you need to install it separately:
+
+#### Method 1: Direct Download (Recommended)
+1. Download ImageMagick from the official website: https://imagemagick.org/script/download.php#windows
+2. Choose the appropriate version for your system (32-bit or 64-bit)
+3. Run the installer and ensure "Install development headers and libraries for C and C++" is checked
+4. Add ImageMagick to your system PATH during installation
+5. Install Python dependencies:
+   ```cmd
+   # Use the Windows-specific environment file
+   conda env create -f environment-windows.yaml
+   conda activate generate-targets
+   
+   # Or use pip
+   pip install -r requirements.txt
+   ```
+
+#### Method 2: Chocolatey Package Manager
+```cmd
+# Install Chocolatey if not already installed (see https://chocolatey.org/install)
+choco install imagemagick
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+#### Method 3: Scoop Package Manager
+```cmd
+# Install Scoop if not already installed (see https://scoop.sh/)
+scoop install imagemagick
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+### Verifying Installation
+
+After installation, verify that ImageMagick is properly installed and accessible:
+
+```bash
+# This should display ImageMagick version information
+magick -version
+```
+
+If the command is not found, ensure that ImageMagick is properly added to your system's PATH environment variable.
+
 ## Usage
 
 To use the code, follow these steps:
 
-1. Install the required dependencies using the provided `environment.yaml` or `requirements.txt`.
+1. Install the required dependencies following the platform-specific instructions in the [Installation](#installation) section above.
 2. Run the script `main.py` with appropriate command-line options to specify the parameters for generating the target images.
 3. Generated PNG files will be saved in the specified output directory.
 
