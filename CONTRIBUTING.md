@@ -43,7 +43,27 @@ Before contributing, ensure you have:
 
 ## Development Setup
 
-### Method 1: Conda Environment (Recommended)
+### Method 1: Pixi (Recommended)
+
+[Pixi](https://pixi.sh) provides the most streamlined development experience:
+
+```bash
+# Install pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Fork and clone your fork
+git clone https://github.com/your-username/scomp-link.git
+cd scomp-link
+
+# Install all dependencies and setup environment
+pixi install
+
+# Verify setup
+pixi run verify-setup
+pixi run test
+```
+
+### Method 2: Conda Environment
 
 ```bash
 # Fork and clone your fork
@@ -59,7 +79,7 @@ python -m pytest test_main.py -v
 python main.py --help
 ```
 
-### Method 2: Virtual Environment
+### Method 3: Virtual Environment
 
 ```bash
 # Clone repository
@@ -83,7 +103,15 @@ python -m pytest test_main.py -v
 
 ### Development Tools
 
-Install additional development tools for code quality:
+**Using pixi (all tools included automatically):**
+```bash
+pixi run lint          # Code style check
+pixi run test          # Run tests
+pixi run format-check  # Check code formatting
+pixi run check-all     # Run all quality checks
+```
+
+**Using pip (manual installation):**
 
 ```bash
 # Already included in requirements.txt

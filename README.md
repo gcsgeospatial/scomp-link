@@ -35,7 +35,29 @@ scomp-link is a Python CLI application that generates high-precision target imag
 
 ## Installation
 
-### Method 1: Conda Environment (Recommended)
+### Method 1: Pixi (Recommended)
+
+[Pixi](https://pixi.sh) is a modern, cross-platform package manager that handles both dependencies and task execution:
+
+```bash
+# Install pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Clone the repository
+git clone https://github.com/gcsgeospatial/scomp-link.git
+cd scomp-link
+
+# Install dependencies and setup environment
+pixi install
+
+# Verify installation
+pixi run help
+
+# Run the application
+pixi run generate-test
+```
+
+### Method 2: Conda Environment
 
 This method automatically installs all dependencies including ImageMagick 7:
 
@@ -52,7 +74,7 @@ conda activate generate-targets
 python main.py --help
 ```
 
-### Method 2: System Dependencies + pip
+### Method 3: System Dependencies + pip
 
 Alternative setup using system packages:
 
@@ -83,6 +105,19 @@ pip install -r requirements.txt
 
 Generate a basic set of photogrammetry targets:
 
+**Using pixi (recommended):**
+```bash
+# Generate test targets (fast)
+pixi run generate-test
+
+# Generate production targets
+pixi run generate-full
+
+# Run tests to verify everything works
+pixi run test
+```
+
+**Using direct Python:**
 ```bash
 # Generate 5 targets for testing (fast)
 python main.py --bits 12 --output-dir ./test --width 300 --height 300 --max-codes 5
@@ -92,6 +127,33 @@ python main.py --bits 12 --output-dir ./targets --width 3000 --height 3000
 ```
 
 ## Usage
+
+### Using Pixi Tasks
+
+Pixi provides convenient pre-configured tasks for common operations:
+
+**Generation tasks:**
+```bash
+pixi run generate-test      # Generate 2 test targets (300x300px)
+pixi run generate-small     # Generate 10 targets (1000x1000px)  
+pixi run generate-full      # Generate all targets (3000x3000px)
+pixi run run -- --help      # Show all command-line options
+```
+
+**Development tasks:**
+```bash
+pixi run test               # Run test suite
+pixi run test-cov           # Run tests with coverage
+pixi run lint               # Check code style
+pixi run validate           # Validate setup and run basic tests
+```
+
+**Utility tasks:**
+```bash
+pixi run clean              # Remove generated PNG files
+pixi run verify-setup       # Verify ImageMagick and dependencies
+pixi run quick-test         # Quick functionality test
+```
 
 ### Command-line Options
 
@@ -267,6 +329,15 @@ Convert polar coordinates to Cartesian coordinates.
 
 This project includes a comprehensive test suite with 30 tests covering all functionality:
 
+**Using pixi (recommended):**
+```bash
+pixi run test               # Run all tests
+pixi run test-cov           # Run tests with coverage report
+pixi run validate           # Run validation checks
+pixi run test-integration   # Run integration tests
+```
+
+**Using direct Python:**
 ```bash
 # Install development dependencies
 pip install -r requirements.txt
@@ -285,6 +356,15 @@ python -m pytest test_main.py::TestCodeGeneration -v
 ### Code Quality
 
 The project maintains high code quality with automated tools:
+
+**Using pixi:**
+```bash
+pixi run lint               # Check code style with flake8
+pixi run format-check       # Check code formatting
+pixi run check-all          # Run all quality checks
+```
+
+**Using direct Python:**
 
 ```bash
 # Check syntax and style
@@ -369,17 +449,30 @@ We welcome contributions to improve scomp-link! Here's how to get started:
    cd scomp-link
    ```
 
-2. **Set up development environment:**
+2. **Set up development environment (choose one):**
+   
+   **Option A: Using pixi (recommended):**
+   ```bash
+   pixi install
+   pixi run verify-setup
+   ```
+   
+   **Option B: Using conda:**
    ```bash
    conda env create -f environment.yaml
    conda activate generate-targets
-   # OR
+   ```
+   
+   **Option C: Using pip:**
+   ```bash
    pip install -r requirements.txt
    ```
 
 3. **Run tests to verify setup:**
    ```bash
-   python -m pytest test_main.py -v
+   pixi run test    # Using pixi
+   # OR
+   python -m pytest test_main.py -v    # Direct Python
    ```
 
 ### Making Changes
@@ -396,6 +489,11 @@ We welcome contributions to improve scomp-link! Here's how to get started:
 
 3. **Validate changes:**
    ```bash
+   # Using pixi (recommended)
+   pixi run check-all              # Run all quality checks
+   pixi run generate-test          # Test basic functionality
+   
+   # Or using direct Python
    python -m pytest test_main.py -v
    python -m flake8 main.py
    python main.py --bits 12 --max-codes 2 --output-dir ./test
