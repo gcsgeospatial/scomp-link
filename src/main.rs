@@ -38,54 +38,67 @@ fn generate_targets(
         let center = (width as f64 / 2.0, height as f64 / 2.0);
         let radius_outer = radius_outer_black + 2; // Example outer radius, adjust based on needs
         
-        let arc_commands = generate_arc_commands(code, bits, center, radius_outer as f64);
+        let arc_args = generate_arc_arguments(code, bits, center, radius_outer as f64);
         
         let filename = format!("{}/{}.png", output_dir, code);
         
-        // Construct the ImageMagick command using the provided radii and other parameters
-        let outer_black_circle = format!(
-            "-fill black -draw \"circle {}, {} {}, {}\"",
-            center.0 as i32, center.1 as i32,
-            center.0 as i32, center.1 as i32 + radius_outer_black as i32
-        );
-        let outer_white_circle = format!(
-            "-fill white -draw \"circle {}, {} {}, {}\"",
-            center.0 as i32, center.1 as i32,
-            center.0 as i32, center.1 as i32 + radius_outer_white as i32
-        );
-        let inner_black_circle = format!(
-            "-fill black -draw \"circle {}, {} {}, {}\"",
-            center.0 as i32, center.1 as i32,
-            center.0 as i32, center.1 as i32 + radius_inner_black as i32
-        );
-        let inner_white_circle = format!(
-            "-fill white -draw \"circle {}, {} {}, {}\"",
-            center.0 as i32, center.1 as i32,
-            center.0 as i32, center.1 as i32 + radius_inner_dot as i32
-        );
+        // Construct ImageMagick arguments directly (no shell quoting needed)
+        let mut args = vec![
+            "-size".to_string(),
+            format!("{}x{}", width, height),
+            "xc:white".to_string(),
+        ];
         
-        let command = format!(
-            "magick -size {}x{} xc:white {} {} {} {} {} {}",
-            width, height,
-            outer_black_circle,
-            arc_commands,
-            outer_white_circle,
-            inner_black_circle,
-            inner_white_circle,
-            filename
-        );
+        // Add outer black circle
+        args.extend([
+            "-fill".to_string(),
+            "black".to_string(),
+            "-draw".to_string(),
+            format!("circle {}, {} {}, {}", 
+                center.0 as i32, center.1 as i32,
+                center.0 as i32, center.1 as i32 + radius_outer_black as i32),
+        ]);
         
-        // Execute the command cross-platform
-        let output = if cfg!(target_os = "windows") {
-            process::Command::new("cmd")
-                .args(["/C", &command])
-                .output()
-        } else {
-            process::Command::new("sh")
-                .arg("-c")
-                .arg(&command)
-                .output()
-        };
+        // Add arc commands if any
+        args.extend(arc_args);
+        
+        // Add outer white circle
+        args.extend([
+            "-fill".to_string(),
+            "white".to_string(),
+            "-draw".to_string(),
+            format!("circle {}, {} {}, {}", 
+                center.0 as i32, center.1 as i32,
+                center.0 as i32, center.1 as i32 + radius_outer_white as i32),
+        ]);
+        
+        // Add inner black circle
+        args.extend([
+            "-fill".to_string(),
+            "black".to_string(),
+            "-draw".to_string(),
+            format!("circle {}, {} {}, {}", 
+                center.0 as i32, center.1 as i32,
+                center.0 as i32, center.1 as i32 + radius_inner_black as i32),
+        ]);
+        
+        // Add inner white circle (dot)
+        args.extend([
+            "-fill".to_string(),
+            "white".to_string(),
+            "-draw".to_string(),
+            format!("circle {}, {} {}, {}", 
+                center.0 as i32, center.1 as i32,
+                center.0 as i32, center.1 as i32 + radius_inner_dot as i32),
+        ]);
+        
+        // Add output filename
+        args.push(filename.clone());
+        
+        // Execute ImageMagick directly with arguments (cross-platform)
+        let output = process::Command::new("magick")
+            .args(&args)
+            .output();
         
         match output {
             Ok(output) => {
@@ -96,13 +109,9 @@ fn generate_targets(
                 }
             }
             Err(e) => {
-                eprintln!("Failed to execute command: {}", e);
-                eprintln!("Command: {}", command);
-                if cfg!(target_os = "windows") {
-                    eprintln!("Make sure ImageMagick is installed and 'magick' is in your PATH");
-                } else {
-                    eprintln!("Make sure ImageMagick is installed and accessible");
-                }
+                eprintln!("Failed to execute ImageMagick: {}", e);
+                eprintln!("Command: magick {}", args.join(" "));
+                eprintln!("Make sure ImageMagick is installed and 'magick' is in your PATH");
                 return Err(e.into());
             }
         }

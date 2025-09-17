@@ -95,9 +95,9 @@ pub fn angle_to_coordinates(angle: f64, radius: f64, center: (f64, f64)) -> (i32
     (x as i32, y as i32)
 }
 
-/// Generate ImageMagick commands for drawing arcs based on the code.
-pub fn generate_arc_commands(code: u32, bits: u32, center: (f64, f64), radius_outer: f64) -> String {
-    let mut commands = Vec::new();
+/// Generate ImageMagick arguments for drawing arcs based on the code.
+pub fn generate_arc_arguments(code: u32, bits: u32, center: (f64, f64), radius_outer: f64) -> Vec<String> {
+    let mut args = Vec::new();
     let angle_per_segment = 360.0 / bits as f64;
     
     for i in 0..bits {
@@ -109,18 +109,35 @@ pub fn generate_arc_commands(code: u32, bits: u32, center: (f64, f64), radius_ou
             let start_outer = angle_to_coordinates(start_angle, radius_outer, center);
             let end_outer = angle_to_coordinates(end_angle, radius_outer, center);
             
-            // Construct the arc command
-            let command = format!(
-                "-fill white -draw \"path 'M {}, {} L {}, {} A {}, {} 0 0, 1 {}, {} Z'\"",
-                center.0 as i32, center.1 as i32,
-                start_outer.0, start_outer.1,
-                radius_outer as i32, radius_outer as i32,
-                end_outer.0, end_outer.1
-            );
-            commands.push(command);
+            // Add arguments for this arc
+            args.extend([
+                "-fill".to_string(),
+                "white".to_string(),
+                "-draw".to_string(),
+                format!("path 'M {}, {} L {}, {} A {}, {} 0 0, 1 {}, {} Z'",
+                    center.0 as i32, center.1 as i32,
+                    start_outer.0, start_outer.1,
+                    radius_outer as i32, radius_outer as i32,
+                    end_outer.0, end_outer.1
+                ),
+            ]);
         }
     }
     
+    args
+}
+
+/// Generate ImageMagick commands for drawing arcs based on the code.
+/// Legacy function for backward compatibility with tests.
+pub fn generate_arc_commands(code: u32, bits: u32, center: (f64, f64), radius_outer: f64) -> String {
+    let args = generate_arc_arguments(code, bits, center, radius_outer);
+    // Join every 4 arguments (fill, white, draw, command) with spaces
+    let mut commands = Vec::new();
+    for chunk in args.chunks(4) {
+        if chunk.len() == 4 {
+            commands.push(format!("{} {} {} \"{}\"", chunk[0], chunk[1], chunk[2], chunk[3]));
+        }
+    }
     commands.join(" ")
 }
 
