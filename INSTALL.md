@@ -167,7 +167,7 @@ cargo install cargo-deb
 cargo deb
 
 # Install the package
-sudo dpkg -i target/debian/scomp-link_1.0.0_amd64.deb
+sudo dpkg -i target/debian/scomp-link_2.0.0_amd64.deb
 ```
 
 #### For Arch Linux (AUR)

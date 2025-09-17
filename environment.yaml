@@ -1,7 +1,0 @@
-name: generate-targets
-channels:
-  - conda-forge
-dependencies:
-  - python
-  - click
-  - imagemagick # [not win]

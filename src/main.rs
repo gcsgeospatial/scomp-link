@@ -123,7 +123,7 @@ fn generate_targets(
 fn main() {
     let matches = Command::new("scomp-link")
         .about("Photogrammetry Target Generator - generates circular photogrammetry targets with encoded bit patterns")
-        .version("1.0.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .arg(Arg::new("bits")
             .long("bits")
             .value_name("INTEGER")
