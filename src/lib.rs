@@ -46,36 +46,37 @@ pub fn count_bit_transitions(mut val: u32) -> u32 {
 /// Generate unique codes based on a given number of bits and optional constraints.
 pub fn generate_codes(bits: u32, transitions: Option<u32>, max_codes: Option<usize>) -> Vec<u32> {
     let mut codes = Vec::new();
-    
+
     // Codes all start with 0 and end with 1, allowing us to check fewer numbers
     for i in 0..(1 << (bits - 2)) {
         // Add 1 bit to end
         let mut code = (i << 1) + 1;
-        
+
         // Perform cyclic shift to minimize value
         code = find_smallest_rotation(code, bits);
-        
+
         // Check which pairs of opposite segments are both 1
         let half_bits = bits >> 1;
-        let diff = (code & ((1 << half_bits) - 1)) & 
-                   ((code & (((1 << half_bits) - 1) << half_bits)) >> half_bits);
-        
+        let diff = (code & ((1 << half_bits) - 1))
+            & ((code & (((1 << half_bits) - 1) << half_bits)) >> half_bits);
+
         // Find parity
         let parity = calc_parity(code);
-        
+
         // Count number of transitions
-        let num_transitions = if transitions.is_some() { 
+        let num_transitions = if transitions.is_some() {
             Some(count_bit_transitions(code))
-        } else { 
-            None 
+        } else {
+            None
         };
-        
+
         // Find unique codes with even parity and at least one pair of opposite
         // segments that are both 1 (and correct number of transitions, if applicable)
-        if parity 
-            && diff > 0 
+        if parity
+            && diff > 0
             && (transitions.is_none() || num_transitions == transitions)
-            && !codes.contains(&code) {
+            && !codes.contains(&code)
+        {
             codes.push(code);
             if let Some(max) = max_codes {
                 if codes.len() >= max {
@@ -84,7 +85,7 @@ pub fn generate_codes(bits: u32, transitions: Option<u32>, max_codes: Option<usi
             }
         }
     }
-    
+
     codes
 }
 
@@ -96,46 +97,64 @@ pub fn angle_to_coordinates(angle: f64, radius: f64, center: (f64, f64)) -> (i32
 }
 
 /// Generate ImageMagick arguments for drawing arcs based on the code.
-pub fn generate_arc_arguments(code: u32, bits: u32, center: (f64, f64), radius_outer: f64) -> Vec<String> {
+pub fn generate_arc_arguments(
+    code: u32,
+    bits: u32,
+    center: (f64, f64),
+    radius_outer: f64,
+) -> Vec<String> {
     let mut args = Vec::new();
     let angle_per_segment = 360.0 / bits as f64;
-    
+
     for i in 0..bits {
         if (1 << (bits - 1 - i)) & code != 0 {
             let start_angle = i as f64 * angle_per_segment;
             let end_angle = (i + 1) as f64 * angle_per_segment;
-            
+
             // Calculate start and end points for the outer arcs
             let start_outer = angle_to_coordinates(start_angle, radius_outer, center);
             let end_outer = angle_to_coordinates(end_angle, radius_outer, center);
-            
+
             // Add arguments for this arc
             args.extend([
                 "-fill".to_string(),
                 "white".to_string(),
                 "-draw".to_string(),
-                format!("path 'M {}, {} L {}, {} A {}, {} 0 0, 1 {}, {} Z'",
-                    center.0 as i32, center.1 as i32,
-                    start_outer.0, start_outer.1,
-                    radius_outer as i32, radius_outer as i32,
-                    end_outer.0, end_outer.1
+                format!(
+                    "path 'M {}, {} L {}, {} A {}, {} 0 0, 1 {}, {} Z'",
+                    center.0 as i32,
+                    center.1 as i32,
+                    start_outer.0,
+                    start_outer.1,
+                    radius_outer as i32,
+                    radius_outer as i32,
+                    end_outer.0,
+                    end_outer.1
                 ),
             ]);
         }
     }
-    
+
     args
 }
 
 /// Generate ImageMagick commands for drawing arcs based on the code.
 /// Legacy function for backward compatibility with tests.
-pub fn generate_arc_commands(code: u32, bits: u32, center: (f64, f64), radius_outer: f64) -> String {
+pub fn generate_arc_commands(
+    code: u32,
+    bits: u32,
+    center: (f64, f64),
+    radius_outer: f64,
+) -> String {
     let args = generate_arc_arguments(code, bits, center, radius_outer);
     // Join every 4 arguments (fill, white, draw, command) with spaces
     let mut commands = Vec::new();
     for chunk in args.chunks(4) {
         if chunk.len() == 4 {
-            commands.push(format!("{} {} {} \"{}\"", chunk[0], chunk[1], chunk[2], chunk[3]));
+            commands.push(format!(
+                "{} {} {} \"{}\"",
+                chunk[0], chunk[1], chunk[2], chunk[3]
+            ));
         }
     }
     commands.join(" ")
@@ -247,7 +266,7 @@ mod tests {
             let codes = generate_codes(6, None, Some(5));
             assert!(!codes.is_empty());
             assert!(codes.len() <= 5);
-            
+
             // All codes should have even parity
             for &code in &codes {
                 assert!(calc_parity(code));
@@ -257,7 +276,7 @@ mod tests {
         #[test]
         fn test_generate_codes_with_transitions() {
             let codes = generate_codes(8, Some(2), Some(3));
-            
+
             // Check that all codes have exactly 2 transitions
             for &code in &codes {
                 assert_eq!(count_bit_transitions(code), 2);
@@ -267,7 +286,7 @@ mod tests {
         #[test]
         fn test_generate_codes_parity_constraint() {
             let codes = generate_codes(6, None, Some(10));
-            
+
             // All generated codes should have even parity
             for &code in &codes {
                 assert!(calc_parity(code), "Code {} should have even parity", code);
@@ -277,7 +296,7 @@ mod tests {
         #[test]
         fn test_generate_codes_uniqueness() {
             let codes = generate_codes(8, None, Some(10));
-            
+
             // Check for duplicates
             for i in 0..codes.len() {
                 for j in (i + 1)..codes.len() {
@@ -294,7 +313,7 @@ mod tests {
         fn test_angle_to_coordinates_basic() {
             let center = (100.0, 100.0);
             let radius = 50.0;
-            
+
             // 0 degrees should point upward (north)
             let (x, y) = angle_to_coordinates(0.0, radius, center);
             assert_eq!(x, 100);
@@ -305,23 +324,23 @@ mod tests {
         fn test_angle_to_coordinates_full_circle() {
             let center = (0.0, 0.0);
             let radius = 100.0;
-            
+
             // Test multiple angles
             let coords_0 = angle_to_coordinates(0.0, radius, center);
             let coords_90 = angle_to_coordinates(90.0, radius, center);
             let coords_180 = angle_to_coordinates(180.0, radius, center);
             let coords_270 = angle_to_coordinates(270.0, radius, center);
-            
+
             // Verify approximate positions (allowing for floating point precision)
             assert!((coords_0.0 - 0).abs() <= 1);
             assert!((coords_0.1 - (-100)).abs() <= 1);
-            
+
             assert!((coords_90.0 - 100).abs() <= 1);
             assert!((coords_90.1 - 0).abs() <= 1);
-            
+
             assert!((coords_180.0 - 0).abs() <= 1);
             assert!((coords_180.1 - 100).abs() <= 1);
-            
+
             assert!((coords_270.0 - (-100)).abs() <= 1);
             assert!((coords_270.1 - 0).abs() <= 1);
         }
@@ -336,9 +355,9 @@ mod tests {
             let bits = 3;
             let center = (100.0, 100.0);
             let radius = 50.0;
-            
+
             let commands = generate_arc_commands(code, bits, center, radius);
-            
+
             // Should generate commands for set bits
             assert!(!commands.is_empty());
             assert!(commands.contains("path"));
@@ -350,9 +369,9 @@ mod tests {
             let bits = 8;
             let center = (100.0, 100.0);
             let radius = 50.0;
-            
+
             let commands = generate_arc_commands(code, bits, center, radius);
-            
+
             // Should generate no commands for empty code
             assert!(commands.is_empty());
         }
@@ -363,9 +382,9 @@ mod tests {
             let bits = 8;
             let center = (100.0, 100.0);
             let radius = 50.0;
-            
+
             let commands = generate_arc_commands(code, bits, center, radius);
-            
+
             // Should generate commands for all segments
             assert!(!commands.is_empty());
             let command_count = commands.matches("path").count();
@@ -380,18 +399,18 @@ mod tests {
         fn test_full_code_generation_pipeline() {
             // Generate codes
             let codes = generate_codes(6, None, Some(3));
-            
+
             // Verify all codes meet requirements
             for &code in &codes {
                 // Even parity
                 assert!(calc_parity(code));
-                
+
                 // Check opposite segments requirement
                 let half_bits = 6 >> 1;
-                let diff = (code & ((1 << half_bits) - 1)) &
-                          ((code & (((1 << half_bits) - 1) << half_bits)) >> half_bits);
+                let diff = (code & ((1 << half_bits) - 1))
+                    & ((code & (((1 << half_bits) - 1) << half_bits)) >> half_bits);
                 assert!(diff > 0);
-                
+
                 // Should be minimal rotation
                 let minimal = find_smallest_rotation(code, 6);
                 assert_eq!(code, minimal);
@@ -402,19 +421,24 @@ mod tests {
         fn test_geometric_calculations_consistency() {
             let center = (150.0, 150.0);
             let radius = 75.0;
-            
+
             // Test that coordinates are consistent across different angles
             for angle in [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0] {
                 let coords = angle_to_coordinates(angle, radius, center);
-                
+
                 // Calculate distance from center
                 let dx = coords.0 as f64 - center.0;
                 let dy = coords.1 as f64 - center.1;
                 let distance = (dx * dx + dy * dy).sqrt();
-                
+
                 // Should be approximately equal to radius (within 2 pixels due to integer conversion and floating point precision)
-                assert!((distance - radius).abs() <= 2.0,
-                       "Distance {} not close to radius {} for angle {}", distance, radius, angle);
+                assert!(
+                    (distance - radius).abs() <= 2.0,
+                    "Distance {} not close to radius {} for angle {}",
+                    distance,
+                    radius,
+                    angle
+                );
             }
         }
     }

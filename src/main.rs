@@ -1,9 +1,10 @@
 use clap::{Arg, Command};
+use scomp_link::*;
 use std::fs;
 use std::process;
-use scomp_link::*;
 
 /// Generate target images with specified parameters and save them as PNG files.
+#[allow(clippy::too_many_arguments)]
 fn generate_targets(
     bits: u32,
     output_dir: &str,
@@ -17,95 +18,117 @@ fn generate_targets(
     max_codes: Option<usize>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Validate bits parameter first (matching Python behavior)
-    if bits <= 0 || bits % 2 != 0 {
+    if bits == 0 || bits % 2 != 0 {
         eprintln!("Error: Number of bits must be positive and even.");
         return Ok(());
     }
-    
+
     // Create output directory if it doesn't exist
     fs::create_dir_all(output_dir)?;
-    
+
     // Check if ImageMagick is available
-    if process::Command::new("magick").arg("--version").output().is_err() {
+    if process::Command::new("magick")
+        .arg("--version")
+        .output()
+        .is_err()
+    {
         eprintln!("Error: ImageMagick is not installed or not in the system's PATH.");
         return Ok(());
     }
-    
+
     let codes = generate_codes(bits, transitions, max_codes);
     println!("{:?}", codes);
-    
+
     for code in codes {
         let center = (width as f64 / 2.0, height as f64 / 2.0);
         let radius_outer = radius_outer_black + 2; // Example outer radius, adjust based on needs
-        
+
         let arc_args = generate_arc_arguments(code, bits, center, radius_outer as f64);
-        
+
         let filename = format!("{}/{}.png", output_dir, code);
-        
+
         // Construct ImageMagick arguments directly (no shell quoting needed)
         let mut args = vec![
             "-size".to_string(),
             format!("{}x{}", width, height),
             "xc:white".to_string(),
         ];
-        
+
         // Add outer black circle
         args.extend([
             "-fill".to_string(),
             "black".to_string(),
             "-draw".to_string(),
-            format!("circle {}, {} {}, {}", 
-                center.0 as i32, center.1 as i32,
-                center.0 as i32, center.1 as i32 + radius_outer_black as i32),
+            format!(
+                "circle {}, {} {}, {}",
+                center.0 as i32,
+                center.1 as i32,
+                center.0 as i32,
+                center.1 as i32 + radius_outer_black as i32
+            ),
         ]);
-        
+
         // Add arc commands if any
         args.extend(arc_args);
-        
+
         // Add outer white circle
         args.extend([
             "-fill".to_string(),
             "white".to_string(),
             "-draw".to_string(),
-            format!("circle {}, {} {}, {}", 
-                center.0 as i32, center.1 as i32,
-                center.0 as i32, center.1 as i32 + radius_outer_white as i32),
+            format!(
+                "circle {}, {} {}, {}",
+                center.0 as i32,
+                center.1 as i32,
+                center.0 as i32,
+                center.1 as i32 + radius_outer_white as i32
+            ),
         ]);
-        
+
         // Add inner black circle
         args.extend([
             "-fill".to_string(),
             "black".to_string(),
             "-draw".to_string(),
-            format!("circle {}, {} {}, {}", 
-                center.0 as i32, center.1 as i32,
-                center.0 as i32, center.1 as i32 + radius_inner_black as i32),
+            format!(
+                "circle {}, {} {}, {}",
+                center.0 as i32,
+                center.1 as i32,
+                center.0 as i32,
+                center.1 as i32 + radius_inner_black as i32
+            ),
         ]);
-        
+
         // Add inner white circle (dot)
         args.extend([
             "-fill".to_string(),
             "white".to_string(),
             "-draw".to_string(),
-            format!("circle {}, {} {}, {}", 
-                center.0 as i32, center.1 as i32,
-                center.0 as i32, center.1 as i32 + radius_inner_dot as i32),
+            format!(
+                "circle {}, {} {}, {}",
+                center.0 as i32,
+                center.1 as i32,
+                center.0 as i32,
+                center.1 as i32 + radius_inner_dot as i32
+            ),
         ]);
-        
+
         // Add output filename
         args.push(filename.clone());
-        
+
         // Execute ImageMagick directly with arguments (cross-platform)
-        let output = process::Command::new("magick")
-            .args(&args)
-            .output();
-        
+        let output = process::Command::new("magick").args(&args).output();
+
         match output {
             Ok(output) => {
                 if output.status.success() {
                     println!("Generated {}", filename);
                 } else {
-                    eprintln!("Error generating {}: {}", filename, String::from_utf8_lossy(&output.stderr));
+                    eprintln!(
+                        "Error generating {}: {}",
+                        filename,
+                        String::from_utf8_lossy(&output.stderr)
+                    );
                 }
             }
             Err(e) => {
@@ -116,7 +139,7 @@ fn generate_targets(
             }
         }
     }
-    
+
     Ok(())
 }
 
@@ -173,19 +196,51 @@ fn main() {
             .value_name("INTEGER")
             .help("Maximum number of codes to generate"))
         .get_matches();
-    
-    let bits: u32 = matches.get_one::<String>("bits").unwrap().parse().unwrap_or(12);
+
+    let bits: u32 = matches
+        .get_one::<String>("bits")
+        .unwrap()
+        .parse()
+        .unwrap_or(12);
     let output_dir = matches.get_one::<String>("output-dir").unwrap();
-    let radius_inner_dot: u32 = matches.get_one::<String>("radius-inner-dot").unwrap().parse().unwrap_or(24);
-    let radius_inner_black: u32 = matches.get_one::<String>("radius-inner-black").unwrap().parse().unwrap_or(288);
-    let radius_outer_white: u32 = matches.get_one::<String>("radius-outer-white").unwrap().parse().unwrap_or(660);
-    let radius_outer_black: u32 = matches.get_one::<String>("radius-outer-black").unwrap().parse().unwrap_or(1032);
-    let width: u32 = matches.get_one::<String>("width").unwrap().parse().unwrap_or(3000);
-    let height: u32 = matches.get_one::<String>("height").unwrap().parse().unwrap_or(3000);
-    
-    let transitions = matches.get_one::<String>("transitions").and_then(|s| s.parse().ok());
-    let max_codes = matches.get_one::<String>("max-codes").and_then(|s| s.parse().ok());
-    
+    let radius_inner_dot: u32 = matches
+        .get_one::<String>("radius-inner-dot")
+        .unwrap()
+        .parse()
+        .unwrap_or(24);
+    let radius_inner_black: u32 = matches
+        .get_one::<String>("radius-inner-black")
+        .unwrap()
+        .parse()
+        .unwrap_or(288);
+    let radius_outer_white: u32 = matches
+        .get_one::<String>("radius-outer-white")
+        .unwrap()
+        .parse()
+        .unwrap_or(660);
+    let radius_outer_black: u32 = matches
+        .get_one::<String>("radius-outer-black")
+        .unwrap()
+        .parse()
+        .unwrap_or(1032);
+    let width: u32 = matches
+        .get_one::<String>("width")
+        .unwrap()
+        .parse()
+        .unwrap_or(3000);
+    let height: u32 = matches
+        .get_one::<String>("height")
+        .unwrap()
+        .parse()
+        .unwrap_or(3000);
+
+    let transitions = matches
+        .get_one::<String>("transitions")
+        .and_then(|s| s.parse().ok());
+    let max_codes = matches
+        .get_one::<String>("max-codes")
+        .and_then(|s| s.parse().ok());
+
     if let Err(e) = generate_targets(
         bits,
         output_dir,
