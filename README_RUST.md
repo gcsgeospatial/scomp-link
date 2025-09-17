@@ -7,6 +7,7 @@ This directory now contains both the original Python implementation and a new Ru
 The Rust implementation provides:
 - **Identical algorithms**: All mathematical functions produce the same results as Python
 - **Same CLI interface**: All command-line options work exactly the same way
+- **Cross-platform**: Works on Windows, macOS, and Linux
 - **Comprehensive tests**: 24 unit tests covering all functionality plus integration tests
 - **Performance**: Native compiled performance compared to interpreted Python
 - **Memory safety**: Rust's ownership system prevents common bugs

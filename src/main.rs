@@ -75,16 +75,36 @@ fn generate_targets(
             filename
         );
         
-        // Execute the command
-        let output = process::Command::new("sh")
-            .arg("-c")
-            .arg(&command)
-            .output()?;
-            
-        if output.status.success() {
-            println!("Generated {}", filename);
+        // Execute the command cross-platform
+        let output = if cfg!(target_os = "windows") {
+            process::Command::new("cmd")
+                .args(["/C", &command])
+                .output()
         } else {
-            eprintln!("Error generating {}: {}", filename, String::from_utf8_lossy(&output.stderr));
+            process::Command::new("sh")
+                .arg("-c")
+                .arg(&command)
+                .output()
+        };
+        
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("Generated {}", filename);
+                } else {
+                    eprintln!("Error generating {}: {}", filename, String::from_utf8_lossy(&output.stderr));
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute command: {}", e);
+                eprintln!("Command: {}", command);
+                if cfg!(target_os = "windows") {
+                    eprintln!("Make sure ImageMagick is installed and 'magick' is in your PATH");
+                } else {
+                    eprintln!("Make sure ImageMagick is installed and accessible");
+                }
+                return Err(e.into());
+            }
         }
     }
     

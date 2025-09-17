@@ -51,10 +51,14 @@ Install to a specific directory:
 # Build the release binary
 cargo build --release
 
-# Copy to desired location
+# Linux/macOS - Copy to desired location
 cp target/release/scomp-link ~/.local/bin/
 # Or system-wide
 sudo cp target/release/scomp-link /usr/local/bin/
+
+# Windows - Copy to a directory in your PATH
+copy target\release\scomp-link.exe C:\Users\%USERNAME%\bin\
+# Or add target\release to your PATH environment variable
 ```
 
 ### Verify Installation
