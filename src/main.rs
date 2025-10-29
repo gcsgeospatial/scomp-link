@@ -18,7 +18,7 @@ fn generate_targets(
     max_codes: Option<usize>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Validate bits parameter first (matching Python behavior)
-    if bits == 0 || bits % 2 != 0 {
+    if bits == 0 || !bits.is_multiple_of(2) {
         eprintln!("Error: Number of bits must be positive and even.");
         return Ok(());
     }
